@@ -52,8 +52,6 @@ class BotOperator:
 						self.OAUTH_TOKEN_KEY = str(raw_input())
 						print('OAuth Token Secret ?')
 						self.OAUTH_TOKEN_SECRET = str(raw_input())
-						print('Wolfram Alpha App Id ?')
-						self.APP_WOLFRAM_ALPHA_ID = str(raw_input())
 
 						self.Data.Set('AppKey', self.APP_KEY)
 						self.Data.Set('AppSecret', self.APP_SECRET)
