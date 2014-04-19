@@ -33,10 +33,8 @@ def main():
     print('Analyzing basic configuration data...')
 
     try:
-        basicConfig = ConfigParser.SafeConfigParser({'TwitterCredentialsPath': '~/.default_creds', 'BotName': 'Unknown'})
+        basicConfig = ConfigParser.SafeConfigParser({'BotName': 'Unknown'})
         basicConfig.read("BasicBot.conf")
-
-        TwitterCredsPath = os.path.expanduser(basicConfig.get('General', 'TwitterCredentialsPath'))
 
         AppName = basicConfig.get('General', 'AppName')
         BotName = basicConfig.get('General', 'BotName')
@@ -46,12 +44,17 @@ def main():
         ConsumerKey = basicConfig.get('OAuth', 'ConsumerKey')
         ConsumerSecret = basicConfig.get('OAuth', 'ConsumerSecret')
 
-        if not os.path.exists(TwitterCredsPath):
-            oauth_dance(AppName, ConsumerKey, ConsumerSecret, TwitterCredsPath)
+        if not basicConfig.has_option('OAuth', 'Token') or not basicConfig.has_option('OAuth', 'Secret'):
+            oauth_token, oauth_secret = oauth_dance(AppName, ConsumerKey, ConsumerSecret)
+            basicConfig.set('OAuth', 'Token', oauth_token)
+            basicConfig.set('OAuth', 'Secret', oauth_secret)
+        
+        OAuthToken = basicConfig.get('OAuth', 'Token')
+        OAuthSecret = basicConfig.get('OAuth', 'Secret')
+        
+        basicConfig.write(open('BasicBot.conf', 'w'))
 
-        oauth_token, oauth_secret = read_token_file(TwitterCredsPath)
-
-        api = Twitter(auth = OAuth(oauth_token, oauth_secret, ConsumerKey, ConsumerSecret))
+        api = Twitter(auth = OAuth(OAuthToken, OAuthSecret, ConsumerKey, ConsumerSecret))
 
         bot = BotOperator(api, BotName, BotConfigFilename)
         bot.Run()
